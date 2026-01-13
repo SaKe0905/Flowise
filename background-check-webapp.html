@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vereinsmitglied Background Check Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-search:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #d0d0d0;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .search-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .card-category.email {
+            background: #42b983;
+        }
+
+        .card-category.address {
+            background: #ff7043;
+        }
+
+        .search-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .search-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .search-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .search-link::before {
+            content: '🔗';
+            font-size: 14px;
+        }
+
+        .icon {
+            display: inline-block;
+            font-size: 18px;
+            margin-right: 6px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .footer-note {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+            margin-top: 30px;
+        }
+
+        .footer-note strong {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .search-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Vereinsmitglied Background Check</h1>
+            <p>Intelligente Recherche über öffentliche Datenquellen</p>
+        </div>
+
+        <div class="content">
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="fullName">📋 Vollständiger Name</label>
+                    <input type="text" id="fullName" placeholder="z.B. Max Mustermann" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">📧 E-Mail-Adresse</label>
+                    <input type="email" id="email" placeholder="z.B. max.mustermann@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">🏠 Wohnanschrift</label>
+                    <input type="text" id="address" placeholder="z.B. Musterstraße 123, 12345 Musterstadt">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-search" onclick="startSearch()">🚀 Suche starten</button>
+                    <button class="btn-reset" onclick="resetForm()">🔄 Zurücksetzen</button>
+                </div>
+            </div>
+
+            <div class="results-section" id="resultsSection">
+                <div class="status-info">
+                    ℹ️ Suchlinks öffnen sich in neuen Tabs. Bitte Browser-Popup-Blocker aktivieren.
+                </div>
+
+                <div class="results-header">
+                    Suchkanäle für: <span id="searchName"></span>
+                </div>
+
+                <!-- NAME SUCHE -->
+                <div class="search-cards">
+                    <div class="card">
+                        <span class="card-category">Name-Suche</span>
+                        <div class="card-title">👥 Soziale Netzwerke & Personen</div>
+                        <div class="search-links">
+                            <a href="#" class="search-link" onclick="openSearch('facebook_name'); return false;">
+                                Facebook
+                            </a>
+                            <a href="#" class="search-link" onclick="openSearch('linkedin_name'); return false;">
+                                LinkedIn
+                            </a>
+                            <a href="#" class="search-link" onclick="openSearch('startpage_name'); return false;">
+                                StartPage
+                            </a>
+                            <a href="#" class="search-link" onclick="openSearch('perplexity_name'); return false;">
+                                Perplexity AI
+                            </a>
+                            <a href="#" class="search-link" onclick="openSearch('socialsearcher_name'); return false;">
+                                Social Searcher
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <span class="card-category">Name-Suche</span>
+                        <div class="card-title">📰 Medien & Presse</div>
+                        <div class="search-links">
+                            <a href="#" class="search-link" onclick="openSearch('genios_name'); return false;">
+                                Genios Pressearchiv
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMAIL SUCHE -->
+                <div class="search-cards">
+                    <div class="card">
+                        <span class="card-category email">E-Mail-Suche</span>
+                        <div class="card-title">🔐 E-Mail-Datenbanken</div>
+                        <div class="search-links">
+                            <a href="#" class="search-link" onclick="openSearch('centralops_email'); return false;">
+                                CentralOps Email Dossier
+                            </a>
+                            <a href="#" class="search-link" onclick="openSearch('startpage_email'); return false;">
+                                StartPage (E-Mail)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADDRESS SUCHE -->
+                <div class="search-cards">
+                    <div class="card">
+                        <span class="card-category address">Adress-Suche</span>
+                        <div class="card-title">📍 Kartendienste</div>
+                        <div class="search-links">
+                            <a href="#" class="search-link" onclick="openSearch('google_maps'); return false;">
+                                Google Maps
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-note">
+                    <strong>⚠️ Wichtiger Hinweis:</strong> Dieses Tool durchsucht ausschließlich öffentliche, legale Datenquellen.
+                    Die Verwendung unterliegt allen geltenden Datenschutzgesetzen (DSGVO, etc.).
+                    Alle Suchanfragen müssen mit Einwilligung der betroffenen Person erfolgen.
+                    Der Nutzer ist allein verantwortlich für die rechtskonforme Verwendung dieses Tools.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let searchData = {
+            name: '',
+            email: '',
+            address: ''
+        };
+
+        function startSearch() {
+            const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const address = document.getElementById('address').value.trim();
+
+            if (!name) {
+                alert('Bitte geben Sie mindestens einen Namen ein.');
+                return;
+            }
+
+            searchData = { name, email, address };
+            document.getElementById('searchName').textContent = name;
+            document.getElementById('resultsSection').classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('fullName').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('address').value = '';
+            document.getElementById('resultsSection').classList.remove('active');
+            searchData = { name: '', email: '', address: '' };
+        }
+
+        function openSearch(type) {
+            let url = '';
+
+            switch(type) {
+                // NAME SEARCHES
+                case 'facebook_name':
+                    url = `https://www.facebook.com/search/people/?q=${encodeURIComponent(searchData.name)}`;
+                    break;
+                case 'linkedin_name':
+                    url = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(searchData.name)}`;
+                    break;
+                case 'startpage_name':
+                    url = `https://www.startpage.com/do/search?q=${encodeURIComponent(searchData.name)}`;
+                    break;
+                case 'perplexity_name':
+                    url = `https://www.perplexity.ai/?q=${encodeURIComponent(searchData.name)}`;
+                    break;
+                case 'socialsearcher_name':
+                    url = `https://www.social-searcher.com/?q=${encodeURIComponent(searchData.name)}`;
+                    break;
+                case 'genios_name':
+                    url = `https://www.genios.de/search/presse?q=${encodeURIComponent(searchData.name)}`;
+                    break;
+
+                // EMAIL SEARCHES
+                case 'centralops_email':
+                    if (searchData.email) {
+                        url = `https://centralops.net/co/EmailDossier.aspx?emailaddr=${encodeURIComponent(searchData.email)}`;
+                    } else {
+                        alert('Bitte geben Sie eine E-Mail-Adresse ein.');
+                        return;
+                    }
+                    break;
+                case 'startpage_email':
+                    if (searchData.email) {
+                        url = `https://www.startpage.com/do/search?q=${encodeURIComponent(searchData.email)}`;
+                    } else {
+                        alert('Bitte geben Sie eine E-Mail-Adresse ein.');
+                        return;
+                    }
+                    break;
+
+                // ADDRESS SEARCHES
+                case 'google_maps':
+                    if (searchData.address) {
+                        url = `https://www.google.de/maps/search/${encodeURIComponent(searchData.address)}`;
+                    } else {
+                        alert('Bitte geben Sie eine Adresse ein.');
+                        return;
+                    }
+                    break;
+            }
+
+            if (url) {
+                window.open(url, '_blank');
+            }
+        }
+
+        // Allow Enter key to start search
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('fullName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') startSearch();
+            });
+        });
+    </script>
+</body>
+</html>
